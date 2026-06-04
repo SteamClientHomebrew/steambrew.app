@@ -21,16 +21,13 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Set up Node.js
-              uses: actions/setup-node@v2
-              with:
-                  node-version: '20'
-
             - name: Set up Bun
               uses: oven-sh/setup-bun@v2
 
             - name: Authenticate SteamBrew
-              run: echo "$FIREBASE_CREDENTIALS" | base64 -d > ./apps/www/credentials.json && echo "$BEARER" > ./apps/www/.env
+              run: |
+                  echo "$FIREBASE_CREDENTIALS" | base64 -d > ./apps/www/credentials.json
+                  echo "$BEARER" > ./apps/www/.env
               env:
                   FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
                   BEARER: ${{ secrets.BEARER }}
@@ -43,25 +40,27 @@ jobs:
               working-directory: apps/www
               run: bun install --frozen-lockfile && bun run build
 
-            - name: Install Firebase Tools
-              run: |
-                  npm install -g firebase-tools
-                  firebase experiments:enable webframeworks
+            - name: Set up SSH
+              uses: webfactory/ssh-agent@v0.9.0
+              with:
+                  ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-            - name: Deploy Documentation
-              env:
-                  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-              run: |
-                  cd apps/docs
-                  firebase use --add steam-brew
-                  firebase target:apply hosting steambrew-docs steambrew-docs
-                  firebase deploy --only hosting --token $FIREBASE_TOKEN --force
+            - name: Add server to known hosts
+              run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-            - name: Deploy Main Site
-              env:
-                  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+            - name: Sync www
               run: |
-                  cd apps/www
-                  firebase use --add steam-brew
-                  firebase target:apply hosting steam-brew steam-brew
-                  firebase deploy --only hosting --token $FIREBASE_TOKEN --force
+                  rsync -az --delete \
+                    apps/www/.next apps/www/public apps/www/package.json apps/www/.env \
+                    ubuntu@${{ secrets.SSH_HOST }}:~/net/steambrew/www/
+
+            - name: Sync docs
+              run: |
+                  rsync -az --delete \
+                    apps/docs/.vitepress/dist/ \
+                    ubuntu@${{ secrets.SSH_HOST }}:~/net/steambrew/docs/
+
+            - name: Install deps and swap
+              run: |
+                  ssh ubuntu@${{ secrets.SSH_HOST }} "cd ~/net/steambrew/www && ~/.bun/bin/bun install --production --silent"
+                  ssh ubuntu@${{ secrets.SSH_HOST }} "bash ~/net/steambrew/swap.sh"
