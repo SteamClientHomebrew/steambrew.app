@@ -9,7 +9,7 @@ Starting Steam in developer mode is rather straight forward, all it requires is 
 
 ### Windows
 
-On Windows, many developers choose to create a custom shortcut for Steam to launch it into developer mode. To do this, lookup Steam on the start menu, right click it and open its file location. From there create a copy of the existing Steam shortcut and name it something relevant like **Steam Dev**. Right click you're new shortcut and at the end of the target simply add `-dev`. Now, whenever you want to develop your theme, Start steam from this shortcut.
+On Windows, many developers choose to create a custom shortcut for Steam to launch it into developer mode. To do this, lookup Steam on the start menu, right click it and open its file location. From there, create a copy of the existing Steam shortcut and name it something relevant like **Steam Dev**. Right click your new shortcut and at the end of the target outside the quotes simply add `-dev` (e.g. `"C:\Program Files (x86)\Steam\steam.exe" -dev`). Now, whenever you want to develop your theme, Start steam from this shortcut.
 
 ### Linux
 
@@ -34,11 +34,11 @@ You can also view all open pages from http://127.0.0.1:8080.
 For the sake of theming you'll likely never need to interact with the `SharedJSContext`, or really know what it is, so just skip this section.
 :::
 
-You'll run into it several times whether you're developing a theme or plugin. We'll explain what it is here; its a concept definitely worth noting.
+You'll run into it several times whether you're developing a theme or plugin. We'll explain what it is here; it's a concept definitely worth noting.
 
 ### What is it? What does it do?
 
-To put it simple, its the brain of Steam. All of Steams windows are managed from the window `SharedJSContext`. This is a _pseudo_ window of sorts as its entirely headless and just runs JavaScript that loads other windows.
+To put it simple, it's the brain of Steam. All of Steams windows are managed from the window `SharedJSContext`. This is a _pseudo_ window of sorts as it's entirely headless and just runs JavaScript that loads other windows.
 
 ### What does that imply?
 
