@@ -73,7 +73,7 @@ function RenderHome() {
 							<h1 className="text-center title">Millennium</h1>
 							<p className="text-center title-description">An open source gateway to a better Steam® client experience.</p>
 							<div className="btn-container">
-								<a href="https://docs.steambrew.app/users/installing" target="_blank" rel="noreferrer">
+								<a href="https://docs.steambrew.app/users/getting-started/installation" target="_blank" rel="noreferrer">
 									<button className="btn btn-primary" id="hero-download-button">
 										<PlatformIcon />
 										<span>Install Now</span>
