@@ -3,6 +3,9 @@ import { test, expect } from '@playwright/test';
 test.describe('GET /api/v1/plugins', () => {
 	test('returns 200 with an array', async ({ request }) => {
 		const res = await request.get('/api/v1/plugins');
+		if (res.status() !== 200) {
+			console.error('Response body:', await res.text());
+		}
 		expect(res.status()).toBe(200);
 
 		const data = await res.json();
