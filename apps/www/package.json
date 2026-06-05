@@ -6,7 +6,11 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"test": "NODE_OPTIONS=--no-deprecation playwright test",
+		"test:api": "NODE_OPTIONS=--no-deprecation playwright test tests/api",
+		"test:e2e": "NODE_OPTIONS=--no-deprecation playwright test tests/e2e",
+		"test:ui": "NODE_OPTIONS=--no-deprecation playwright test --ui"
 	},
 	"dependencies": {
 		"@fancyapps/ui": "^5.0.36",
@@ -40,6 +44,7 @@
 		"unist-util-visit": "^5.0.0"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.60.0",
 		"@types/node": "22.13.13",
 		"@types/react": "19.0.12",
 		"typescript": "5.8.2"
