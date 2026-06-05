@@ -105,9 +105,9 @@ function CreateCard(item) {
 								<div className="card-stat" id="addon-likes">
 									<div className="pfp-name">
 										<p className="card-subtext package-author">by {data?.repoOwner}</p>
-										<a target="_blank" className="addon-author-container">
+										<span className="addon-author-container">
 											<img loading="lazy" src={`https://github.com/${data?.repoOwner}.png`} />
-										</a>
+										</span>
 									</div>
 									<div className="tt-plugin-download-count" role="link">
 										<svg style={{ color: 'currentColor', width: '20px', height: '20px' }} className="package-stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
