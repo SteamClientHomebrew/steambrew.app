@@ -11,6 +11,10 @@ const RetrievePluginList = async () => {
 		})
 			.then((text) => text.json())
 			.then((data) => {
+				if (!Array.isArray(data)) {
+					reject(new Error(`GitHub API error: ${JSON.stringify(data)}`));
+					return;
+				}
 				resolve(
 					data.map((plugin) => {
 						const pluginLinks = plugin._links;

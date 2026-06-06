@@ -33,7 +33,7 @@ jobs:
             - name: Authenticate SteamBrew
               run: |
                   echo "$FIREBASE_CREDENTIALS" | base64 -d > ./apps/www/credentials.json
-                  echo "$BEARER" > ./apps/www/.env
+                  echo "BEARER=$BEARER" > ./apps/www/.env
               env:
                   FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
                   BEARER: ${{ secrets.BEARER }}
