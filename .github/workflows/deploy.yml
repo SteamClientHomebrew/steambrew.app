@@ -33,7 +33,7 @@ jobs:
             - name: Authenticate SteamBrew
               run: |
                   echo "$FIREBASE_CREDENTIALS" | base64 -d > ./apps/www/credentials.json
-                  echo "BEARER=$BEARER" > ./apps/www/.env
+                  echo "$BEARER" > ./apps/www/.env
               env:
                   FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
                   BEARER: ${{ secrets.BEARER }}
@@ -49,6 +49,9 @@ jobs:
             - name: Build www
               working-directory: apps/www
               run: bun run build
+              env:
+                  BEARER: ${{ secrets.BEARER }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install Playwright browsers
               if: ${{ inputs.run_tests != false }}
@@ -61,6 +64,7 @@ jobs:
               run: bun run start &
               env:
                   BEARER: ${{ secrets.BEARER }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Wait for server
               if: ${{ inputs.run_tests != false }}

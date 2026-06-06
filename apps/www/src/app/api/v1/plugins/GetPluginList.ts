@@ -4,7 +4,7 @@ const RetrievePluginList = async () => {
 	return new Promise((resolve, reject) => {
 		fetch('https://api.github.com/repos/SteamClientHomebrew/PluginDatabase/contents/plugins', {
 			headers: {
-				Authorization: process.env.BEARER!,
+				Authorization: process.env.GITHUB_TOKEN ? `Bearer ${process.env.GITHUB_TOKEN}` : process.env.BEARER!,
 				'Content-Type': 'application/json',
 			},
 			next: { revalidate: 300 },
