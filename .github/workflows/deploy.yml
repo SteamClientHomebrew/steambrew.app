@@ -49,9 +49,6 @@ jobs:
             - name: Build www
               working-directory: apps/www
               run: bun run build
-              env:
-                  BEARER: ${{ secrets.BEARER }}
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install Playwright browsers
               if: ${{ inputs.run_tests != false }}
@@ -63,7 +60,6 @@ jobs:
               working-directory: apps/www
               run: bun run start &
               env:
-                  BEARER: ${{ secrets.BEARER }}
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Wait for server
