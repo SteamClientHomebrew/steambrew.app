@@ -66,7 +66,6 @@ export const getServerSideProps = async (context) => {
 
 	try {
 		const response = await fetch(API_URL + `/api/v1/plugin/` + context.query.id);
-		const pluginData = await response.json();
 
 		if (response.status === 404) {
 			return {
@@ -76,6 +75,12 @@ export const getServerSideProps = async (context) => {
 				},
 			};
 		}
+
+		if (!response.ok) {
+			throw new Error(`API returned ${response.status}`);
+		}
+
+		const pluginData = await response.json();
 		let warningMessage = mdOverrides?.warnings?.plugins?.[pluginData?.id];
 		let errorMessage = mdOverrides?.errors?.plugins?.[pluginData?.id];
 
