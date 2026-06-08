@@ -1,11 +1,8 @@
-<div align="center">
-<!-- <img src="https://i.imgur.com/9qYPFSA.png" alt="Alt text" width="40">
-  ## Millennium for Steam® -->
+# https://steambrew.app
 
-<h3><img align="center" width="40px" src="https://i.imgur.com/9qYPFSA.png"> &nbsp; &nbsp;<h3>Steam Client Homebrew</h3><h6>https://steambrew.app/</h6></h3>
-<br>
+[Home Page](https://steambrew.app/) • [Discord](https://steambrew.app/discord) • [Documentation](https://docs.steambrew.app/)
 
-</div>
+Documentation and website assets for Millennium. This repository also includes the Millennium API that is responsible for serving theme and plugin updates. 
 
 ## Contents
 
@@ -18,8 +15,8 @@
 ```bash
 git clone https://github.com/SteamClientHomebrew/SteamBrew.git
 cd SteamBrew
-pnpm install
-pnpm run dev
+bun install
+bun run dev
 ```
 
 ## Contributing
