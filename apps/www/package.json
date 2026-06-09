@@ -21,7 +21,7 @@
 		"firebase-tools": "13",
 		"hast-util-sanitize": "^5.0.2",
 		"highlight.js": "^11.11.1",
-		"next": "14.2.35",
+		"next": "^16",
 		"node-cache": "^5.1.2",
 		"notyf": "^3.10.0",
 		"prism-react-renderer": "^2.4.1",

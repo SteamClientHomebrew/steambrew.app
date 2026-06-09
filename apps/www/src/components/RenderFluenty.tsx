@@ -71,9 +71,9 @@ function DisplayFluentyAd() {
 								<div className="card-stat" id="addon-likes">
 									<div className="pfp-name">
 										<p className="card-subtext package-author">by Steam Homebrew</p>
-										<a target="_blank" className="addon-author-container">
+										<span className="addon-author-container">
 											<img loading="lazy" src={`https://raw.githubusercontent.com/SteamClientHomebrew/SteamBrew/refs/heads/main/static/steambrew-logo.png`} />
-										</a>
+										</span>
 									</div>
 								</div>
 							</div>

@@ -1,5 +1,3 @@
-'use client';
-
 import { unified } from 'unified';
 
 import rehypeStringify from 'rehype-stringify';
@@ -21,12 +19,12 @@ function addPathToImgSrc(options) {
 	return (tree) => {
 		visit(tree, 'element', (node, index, parent) => {
 			if (node.tagName === 'img' && node.properties && node.properties.src) {
-				// Check if the src is already a full URL
 				if (!node.properties.src.startsWith('http')) {
 					node.properties.src = `https://raw.githubusercontent.com/${options.owner}/${options.repo}/${options.commit}/${node.properties.src}`;
 				}
 
-				if (parent) {
+				// Don't wrap in anchor if already inside one — nested <a> is invalid HTML
+				if (parent && (parent as any).tagName !== 'a') {
 					const anchor = {
 						type: 'element',
 						tagName: 'a',
@@ -39,7 +37,6 @@ function addPathToImgSrc(options) {
 						children: [{ ...node }],
 					};
 
-					// Remove data-fancybox attribute if image is too small like with badges
 					node.properties.onload = `if(this.naturalWidth >= 100 && this.naturalHeight >= 100) { this.parentElement.setAttribute('data-fancybox', 'gallery'); }`;
 					parent.children[index!] = anchor;
 				}
@@ -58,8 +55,8 @@ export async function MarkdownToHtml(markdown, owner, repo, commit, message) {
 		.use(remarkGfm)
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(rehypeRaw)
-		.use(rehypeSanitize, sanitizeSchema)
 		.use(addPathToImgSrc, { owner, repo, commit })
+		.use(rehypeSanitize, sanitizeSchema)
 		.use(rehypeGithubAlert)
 		.use(rehypeStringify, { allowDangerousHtml: true })
 		.process(markdown);

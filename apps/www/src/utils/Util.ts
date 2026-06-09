@@ -1,5 +1,3 @@
-'use client';
-
 import { API_URL } from './globals';
 
 declare global {
@@ -34,11 +32,11 @@ export const GetStatisticsSync = async (): Promise<StatisticProps> => {
 	return window.cachedStatistics;
 };
 
-export const FormatNumber = (number) => {
+export const FormatNumber = (number: number) => {
 	return number >= 1000 ? `${(number / 1000).toFixed(1)}K` : number;
 };
 
-export const FormatBytes = (bytes) => {
+export const FormatBytes = (bytes: number) => {
 	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 	if (bytes === 0) return '0 Byte';
 
@@ -46,6 +44,6 @@ export const FormatBytes = (bytes) => {
 	return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
 };
 
-export const DateToString = (dateString) => {
+export const DateToString = (dateString: string) => {
 	return new Date(new Date(dateString).getTime() - new Date(dateString).getTimezoneOffset() * 60000).toDateString();
 };

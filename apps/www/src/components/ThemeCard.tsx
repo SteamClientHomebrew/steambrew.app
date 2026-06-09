@@ -20,7 +20,7 @@ function CreateCard(item) {
 	}
 
 	const openInNewTab = (e) => {
-		window.open(`/theme?id=${data.data.id}`, '_blank');
+		window.open(`/theme/${data.data.id}`, '_blank');
 		setContextMenu({ ...contextMenu, visible: false });
 	};
 
@@ -71,7 +71,7 @@ function CreateCard(item) {
 
 	return (
 		<>
-			<a className="card-wrap" href={`/theme?id=${data.data.id}`} onContextMenu={handleContextMenu} ref={cardRef} tabIndex={0} style={{ position: 'relative', userSelect: 'none' }}>
+			<a className="card-wrap" href={`/theme/${data.data.id}`} onContextMenu={handleContextMenu} ref={cardRef} tabIndex={0} style={{ position: 'relative', userSelect: 'none' }}>
 				<div className="card" style={{ width: '100%', height: '100%' }}>
 					<img
 						loading="lazy"
@@ -92,9 +92,9 @@ function CreateCard(item) {
 								<div className="card-stat" id="addon-likes">
 									<div className="pfp-name">
 										<p className="card-subtext package-author">by {data.data.github.owner}</p>
-										<a target="_blank" className="addon-author-container">
+										<span className="addon-author-container">
 											<img loading="lazy" src={`https://github.com/${data?.data?.github?.owner}.png`} />
-										</a>
+										</span>
 									</div>
 								</div>
 							</div>
@@ -152,7 +152,7 @@ function CreateCard(item) {
 							className="custom-context-menu-option"
 							onClick={(e) => {
 								e.stopPropagation();
-								const themeUrl = `${window.location.origin}/theme?id=${data.data.id}`;
+								const themeUrl = `${window.location.origin}/theme/${data.data.id}`;
 								try {
 									navigator.clipboard.writeText(themeUrl);
 								} catch (err) {

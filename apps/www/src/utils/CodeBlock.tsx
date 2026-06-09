@@ -3,8 +3,13 @@ import React, { useEffect, useRef } from 'react';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/monokai.css';
 
-export const CodeBlock = ({ language, value }) => {
-	const codeRef = useRef(null);
+interface CodeBlockProps {
+	language: string;
+	value: string;
+}
+
+export const CodeBlock = ({ language, value }: CodeBlockProps) => {
+	const codeRef = useRef<HTMLElement>(null);
 	useEffect(() => {
 		if (codeRef.current) {
 			hljs.highlightElement(codeRef.current);

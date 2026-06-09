@@ -1,6 +1,5 @@
 'use client';
 
-import Head from 'next/head';
 import RenderFooter from '@/components/FooterComponent';
 import RenderHeader from '@/components/HeaderComponent';
 import { DisplayFluentyAd } from '@/components/RenderFluenty';
@@ -11,19 +10,15 @@ import CreateCard from '@/components/ThemeCard';
 import ShowThemeSkeletonCards from '@/components/SkeletonCard';
 import { API_URL } from '@/utils/globals';
 
-export async function getServerSideProps(context) {
-	const { req } = context;
-	const userAgent = req.headers['user-agent'];
-
-	const isSteamClient = /Valve Steam Client/.test(userAgent);
-	return { props: { isSteamClient } };
+interface ThemeLibraryProps {
+	isSteamClient: boolean;
 }
 
-function ThemeLibrary({ isSteamClient }) {
-	const [cards, setCards] = useState([]);
-	const [tags, setTags] = useState([]);
-	const [sortBy, setSortBy] = useState(1); // Default sorting method
-	const [selectedTags, setSelectedTags] = useState({ label: 'All' });
+function ThemeLibrary({ isSteamClient }: ThemeLibraryProps) {
+	const [cards, setCards] = useState<React.ReactNode[]>([]);
+	const [tags, setTags] = useState<string[]>([]);
+	const [sortBy, setSortBy] = useState(1);
+	const [selectedTags, setSelectedTags] = useState<{ label: string; value?: number } | null>({ label: 'All' });
 	const [searchQuery, setSearchQuery] = useState('');
 	const [loading, setLoading] = useState(true);
 
@@ -33,55 +28,47 @@ function ThemeLibrary({ isSteamClient }) {
 				const response = await fetch(API_URL + '/api/v2');
 				let result = await response.json();
 
-				const buffer = ['All'];
-				result.forEach((theme) => {
-					theme?.tags?.forEach((tag) => {
-						if (!buffer.includes(tag)) {
-							buffer.push(tag);
-						}
+				const buffer: string[] = ['All'];
+				result.forEach((theme: any) => {
+					theme?.tags?.forEach((tag: string) => {
+						if (!buffer.includes(tag)) buffer.push(tag);
 					});
 				});
-
 				setTags(buffer);
 
 				if (searchQuery) {
 					const query = searchQuery.toLowerCase();
-					result = result.filter((item) => item.name?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query) || item.data?.github?.owner?.toLowerCase().includes(query));
+					result = result.filter((item: any) => item.name?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query) || item.data?.github?.owner?.toLowerCase().includes(query));
 				}
 
-				let sorted = [...result];
-				let filteredData = [];
+				let filteredData: any[] = [];
 
-				if (selectedTags.label != 'All') {
-					filteredData = result.filter((item) => {
-						return item.tags.includes(selectedTags.label);
-					});
+				if (selectedTags?.label !== 'All') {
+					filteredData = result.filter((item: any) => item.tags.includes(selectedTags?.label));
 				} else {
 					filteredData = result;
 				}
 
+				let sorted = [...filteredData];
+
 				switch (sortBy) {
-					case 1: // Most Downloaded
-						sorted = filteredData.sort((a, b) => (b?.data?.download ?? 0) - (a?.data?.download ?? 0));
+					case 1:
+						sorted = filteredData.sort((a: any, b: any) => (b?.data?.download ?? 0) - (a?.data?.download ?? 0));
 						break;
-					case 2: // Least Downloaded
-						sorted = filteredData.sort((a, b) => (a?.data?.download ?? 0) - (b?.data?.download ?? 0));
+					case 2:
+						sorted = filteredData.sort((a: any, b: any) => (a?.data?.download ?? 0) - (b?.data?.download ?? 0));
 						break;
-					case 3: // Recently Updated
-						sorted = filteredData.sort((a, b) => new Date(b.commit_data.committedDate) - new Date(a.commit_data.committedDate));
+					case 3:
+						sorted = filteredData.sort((a: any, b: any) => new Date(b.commit_data.committedDate).getTime() - new Date(a.commit_data.committedDate).getTime());
 						break;
-					case 4: // Least Recently Updated
-						sorted = filteredData.sort((a, b) => new Date(a.commit_data.committedDate) - new Date(b.commit_data.committedDate));
+					case 4:
+						sorted = filteredData.sort((a: any, b: any) => new Date(a.commit_data.committedDate).getTime() - new Date(b.commit_data.committedDate).getTime());
 						break;
-					case 5: // Alphabetically
-						sorted = filteredData.sort((a, b) => a.name.localeCompare(b.name));
-						break;
-					default:
+					case 5:
+						sorted = filteredData.sort((a: any, b: any) => a.name.localeCompare(b.name));
 						break;
 				}
-				const cardElements = sorted.map((item) => <CreateCard key={item.id} data={item} />);
-
-				setCards(cardElements);
+				setCards(sorted.map((item: any) => <CreateCard key={item.id} data={item} />));
 			} catch (error) {
 				console.error('Error fetching data:', error);
 			} finally {
@@ -100,27 +87,20 @@ function ThemeLibrary({ isSteamClient }) {
 		{ value: 5, label: 'Alphabetically', checked: false },
 	]);
 
-	const toggleCheckbox = (index) => {
-		const updatedOptions = options.map((option) => {
-			if (option.value === index) {
-				setSortBy(option.value);
-				return { ...option, checked: !option.checked };
-			} else {
+	const toggleCheckbox = (index: number) => {
+		setOptions(
+			options.map((option) => {
+				if (option.value === index) {
+					setSortBy(option.value);
+					return { ...option, checked: !option.checked };
+				}
 				return { ...option, checked: false };
-			}
-		});
-		setOptions(updatedOptions);
-	};
-
-	const handleTagChange = (selectedOptions) => {
-		setSelectedTags(selectedOptions);
+			}),
+		);
 	};
 
 	return (
 		<div>
-			<Head>
-				<title>Themes • Millennium</title>
-			</Head>
 			<div className="vm-placement" data-id="60f82387ffc37172cbbc0201"></div>
 			<div className="vm-placement" id="vm-av" data-format="isvideo"></div>
 			{!isSteamClient ? RenderHeader() : <></>}
@@ -144,10 +124,7 @@ function ThemeLibrary({ isSteamClient }) {
 							<input className="search" id="addon-search" type="text" name="search" placeholder="Type here to search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
 							<button className="search-clear-btn" type="reset">
 								<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16">
-									<path
-										fillRule="evenodd"
-										d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"
-									></path>
+									<path fillRule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
 								</svg>
 							</button>
 						</form>
@@ -155,13 +132,7 @@ function ThemeLibrary({ isSteamClient }) {
 						{options.map((tag, index) => (
 							<div key={index} className="theme-tag" onClick={() => toggleCheckbox(tag.value)}>
 								<span className="checkbox_check__5FdyV">
-									<input
-										className="geist-sr-only checkbox_input__ydSbd"
-										id={`checkbox-sort-${tag.value}`}
-										type="checkbox"
-										checked={tag.checked} // Assuming you have a property 'checked' in your tag object
-										onChange={() => toggleCheckbox(tag.value)}
-									/>
+									<input className="geist-sr-only checkbox_input__ydSbd" id={`checkbox-sort-${tag.value}`} type="checkbox" checked={tag.checked} onChange={() => toggleCheckbox(tag.value)} />
 									<span aria-hidden="true" className="checkbox_icon__6T6ug">
 										<svg fill="none" height="16" viewBox="0 0 20 20" width="16">
 											<path d="M14 7L8.5 12.5L6 10" stroke="black" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
@@ -175,13 +146,12 @@ function ThemeLibrary({ isSteamClient }) {
 
 						<div className="filter-header filter-spacer">Filter Tags</div>
 						<Select
+							instanceId="theme-tags"
 							className="react-select-container"
 							classNamePrefix="react-select"
 							placeholder="Select tags..."
-							options={tags.map((tag, index) => {
-								return { value: index, label: tag };
-							})}
-							onChange={handleTagChange}
+							options={tags.map((tag, index) => ({ value: index, label: tag }))}
+							onChange={(opt) => setSelectedTags(opt)}
 							value={selectedTags}
 						/>
 					</div>
@@ -205,8 +175,8 @@ function ThemeLibrary({ isSteamClient }) {
 								) : (
 									<div className="card-container">
 										<DisplayFluentyAd />
-										{cards.map((tag, index) => (
-											<React.Fragment key={index}>{tag}</React.Fragment>
+										{cards.map((card, index) => (
+											<React.Fragment key={index}>{card}</React.Fragment>
 										))}
 									</div>
 								)}

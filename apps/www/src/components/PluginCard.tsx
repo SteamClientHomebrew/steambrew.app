@@ -20,7 +20,7 @@ function CreateCard(item) {
 	}
 
 	const openInNewTab = (e) => {
-		window.open(`/plugin?id=${data.id}`, '_blank');
+		window.open(`/plugin/${data.id}`, '_blank');
 		setContextMenu({ ...contextMenu, visible: false });
 	};
 
@@ -40,7 +40,7 @@ function CreateCard(item) {
 	};
 
 	const copyUrl = async (e) => {
-		const pluginUrl = `${window.location.origin}/plugin?id=${data.id}`;
+		const pluginUrl = `${window.location.origin}/plugin/${data.id}`;
 
 		try {
 			await navigator.clipboard.writeText(pluginUrl);
@@ -95,7 +95,7 @@ function CreateCard(item) {
 
 	return (
 		<>
-			<a className="card-wrap" href={`/plugin?id=${data.id}`} onContextMenu={handleContextMenu} ref={cardRef} tabIndex={0} style={{ position: 'relative', userSelect: 'none' }}>
+			<a className="card-wrap" href={`/plugin/${data.id}`} onContextMenu={handleContextMenu} ref={cardRef} tabIndex={0} style={{ position: 'relative', userSelect: 'none' }}>
 				<div className="card">
 					<div className="card-body">
 						<h3 className="card-title">{data?.pluginJson?.common_name}</h3>

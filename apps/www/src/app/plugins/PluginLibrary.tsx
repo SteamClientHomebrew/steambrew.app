@@ -1,29 +1,22 @@
 'use client';
 
-import Head from 'next/head';
 import RenderFooter from '@/components/FooterComponent';
 import RenderHeader from '@/components/HeaderComponent';
 import '@/css/index.css';
-import Select from 'react-select';
 import { useState, useEffect } from 'react';
 import CreateCard from '@/components/PluginCard';
 import ShowThemeSkeletonCards from '@/components/SkeletonCard';
 
 import { API_URL } from '@/utils/globals';
 
-export async function getServerSideProps(context) {
-	const { req } = context;
-	const userAgent = req.headers['user-agent'];
-
-	const isSteamClient = /Valve Steam Client/.test(userAgent);
-	return { props: { isSteamClient } };
+interface PluginLibraryProps {
+	isSteamClient: boolean;
 }
 
-function PluginLibrary({ isSteamClient }) {
-	const [cards, setCards] = useState([]);
-	const [tags, setTags] = useState([]);
-	const [sortBy, setSortBy] = useState(1); // Default sorting method
-	const [selectedTags, setSelectedTags] = useState({ label: 'All' });
+function PluginLibrary({ isSteamClient }: PluginLibraryProps) {
+	const [cards, setCards] = useState<React.ReactNode[]>([]);
+	const [sortBy, setSortBy] = useState(1);
+	const [selectedTags, setSelectedTags] = useState<{ label: string }>({ label: 'All' });
 	const [searchQuery, setSearchQuery] = useState('');
 	const [loading, setLoading] = useState(true);
 
@@ -33,55 +26,39 @@ function PluginLibrary({ isSteamClient }) {
 				const response = await fetch(API_URL + '/api/v1/plugins/');
 				let result = await response.json();
 
-				const buffer = ['All'];
-				result.forEach((theme) => {
-					theme?.tags?.forEach((tag) => {
-						if (!buffer.includes(tag)) {
-							buffer.push(tag);
-						}
-					});
-				});
-
-				setTags(buffer);
-
 				if (searchQuery) {
 					const query = searchQuery.toLowerCase();
-					result = result.filter((item) => item.pluginJson?.common_name?.toLowerCase().includes(query) || item.pluginJson?.description?.toLowerCase().includes(query) || item.repoOwner?.toLowerCase().includes(query));
+					result = result.filter((item: any) => item.pluginJson?.common_name?.toLowerCase().includes(query) || item.pluginJson?.description?.toLowerCase().includes(query) || item.repoOwner?.toLowerCase().includes(query));
 				}
 
-				let sorted = [...result];
-				let filteredData = [];
+				let filteredData: any[] = [];
 
 				if (selectedTags.label != 'All') {
-					filteredData = result.filter((item) => {
-						return item.tags.includes(selectedTags.label);
-					});
+					filteredData = result.filter((item: any) => item.tags.includes(selectedTags.label));
 				} else {
 					filteredData = result;
 				}
 
+				let sorted = [...filteredData];
+
 				switch (sortBy) {
-					case 1: // Most Downloaded
-						sorted = filteredData.sort((a, b) => (b?.downloadCount ?? 0) - (a?.downloadCount ?? 0));
+					case 1:
+						sorted = filteredData.sort((a: any, b: any) => (b?.downloadCount ?? 0) - (a?.downloadCount ?? 0));
 						break;
-					case 2: // Least Downloaded
-						sorted = filteredData.sort((a, b) => (a?.downloadCount ?? 0) - (b?.downloadCount ?? 0));
+					case 2:
+						sorted = filteredData.sort((a: any, b: any) => (a?.downloadCount ?? 0) - (b?.downloadCount ?? 0));
 						break;
-					case 3: // Recently Updated
-						sorted = filteredData.sort((a, b) => new Date(b.commitDate) - new Date(a.commitDate));
+					case 3:
+						sorted = filteredData.sort((a: any, b: any) => new Date(b.commitDate).getTime() - new Date(a.commitDate).getTime());
 						break;
-					case 4: // Least Recently Updated
-						sorted = filteredData.sort((a, b) => new Date(a.commitDate) - new Date(b.commitDate));
+					case 4:
+						sorted = filteredData.sort((a: any, b: any) => new Date(a.commitDate).getTime() - new Date(b.commitDate).getTime());
 						break;
-					case 5: // Alphabetically
-						sorted = filteredData.sort((a, b) => (a?.pluginJson?.common_name ?? a?.repoName).localeCompare(b?.pluginJson?.common_name ?? b?.repoName));
-						break;
-					default:
+					case 5:
+						sorted = filteredData.sort((a: any, b: any) => (a?.pluginJson?.common_name ?? a?.repoName).localeCompare(b?.pluginJson?.common_name ?? b?.repoName));
 						break;
 				}
-				const cardElements = sorted.map((item) => <CreateCard key={item.id} data={item} />);
-
-				setCards(cardElements);
+				setCards(sorted.map((item: any) => <CreateCard key={item.id} data={item} />));
 			} catch (error) {
 				console.error('Error fetching data:', error);
 			} finally {
@@ -100,27 +77,20 @@ function PluginLibrary({ isSteamClient }) {
 		{ value: 5, label: 'Alphabetically', checked: false },
 	]);
 
-	const toggleCheckbox = (index) => {
-		const updatedOptions = options.map((option) => {
-			if (option.value === index) {
-				setSortBy(option.value);
-				return { ...option, checked: !option.checked };
-			} else {
+	const toggleCheckbox = (index: number) => {
+		setOptions(
+			options.map((option) => {
+				if (option.value === index) {
+					setSortBy(option.value);
+					return { ...option, checked: !option.checked };
+				}
 				return { ...option, checked: false };
-			}
-		});
-		setOptions(updatedOptions);
-	};
-
-	const handleTagChange = (selectedOptions) => {
-		setSelectedTags(selectedOptions);
+			}),
+		);
 	};
 
 	return (
 		<div>
-			<Head>
-				<title>Plugins • Millennium</title>
-			</Head>
 			<div className="vm-placement" data-id="60f82387ffc37172cbbc0201"></div>
 			<div className="vm-placement" id="vm-av" data-format="isvideo"></div>
 			{!isSteamClient ? RenderHeader() : <></>}
@@ -144,10 +114,7 @@ function PluginLibrary({ isSteamClient }) {
 							<input className="search" id="addon-search" type="text" name="search" placeholder="Type here to search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
 							<button className="search-clear-btn" type="reset">
 								<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16">
-									<path
-										fillRule="evenodd"
-										d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"
-									></path>
+									<path fillRule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path>
 								</svg>
 							</button>
 						</form>
@@ -155,13 +122,7 @@ function PluginLibrary({ isSteamClient }) {
 						{options.map((tag, index) => (
 							<div key={index} className="theme-tag" onClick={() => toggleCheckbox(tag.value)}>
 								<span className="checkbox_check__5FdyV">
-									<input
-										className="geist-sr-only checkbox_input__ydSbd"
-										id={`checkbox-sort-${tag.value}`}
-										type="checkbox"
-										checked={tag.checked} // Assuming you have a property 'checked' in your tag object
-										onChange={() => toggleCheckbox(tag.value)}
-									/>
+									<input className="geist-sr-only checkbox_input__ydSbd" id={`checkbox-sort-${tag.value}`} type="checkbox" checked={tag.checked} onChange={() => toggleCheckbox(tag.value)} />
 									<span aria-hidden="true" className="checkbox_icon__6T6ug">
 										<svg fill="none" height="16" viewBox="0 0 20 20" width="16">
 											<path d="M14 7L8.5 12.5L6 10" stroke="black" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
@@ -178,18 +139,7 @@ function PluginLibrary({ isSteamClient }) {
 							<div className="theme-listings">
 								<div className="information">
 									<div className="icon">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="24"
-											height="24"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											style={{ flexShrink: 0, marginTop: '2px' }}
-										>
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '2px' }}>
 											<circle cx="12" cy="12" r="10" />
 											<line x1="12" y1="8" x2="12" y2="12" />
 											<line x1="12" y1="16" x2="12.01" y2="16" />
@@ -197,7 +147,7 @@ function PluginLibrary({ isSteamClient }) {
 									</div>
 									<div className="content">
 										Looking for <b>Augmented Steam</b> or <b>SteamDB</b>? They've both been superseded by{' '}
-										<a href="https://steambrew.app/plugin?id=788ed8554492" style={{ color: 'inherit', fontWeight: 'bold', textDecoration: 'underline' }}>
+										<a href="/plugin/788ed8554492" style={{ color: 'inherit', fontWeight: 'bold', textDecoration: 'underline' }}>
 											Extendium
 										</a>{' '}
 										on April 4th, 2026. Extendium offers the same features and more!
@@ -219,8 +169,8 @@ function PluginLibrary({ isSteamClient }) {
 									</div>
 								) : (
 									<div className="card-container plugin-card-container">
-										{cards.map((tag, index) => (
-											<div key={index}>{tag}</div>
+										{cards.map((card, index) => (
+											<div key={index}>{card}</div>
 										))}
 									</div>
 								)}
