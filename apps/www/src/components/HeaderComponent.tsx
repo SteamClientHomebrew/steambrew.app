@@ -28,7 +28,7 @@ function RenderHeader() {
 					<nav id="navbar-nav-items" className="flex-container align-center" data-toggle="affix">
 						<NavbarItem name="Themes" url="/themes" />
 						<NavbarItem name="Plugins" url="/plugins" />
-						<NavbarItem name="Documentation" url="https://docs.steambrew.app/" isExternal={true} />
+						<NavbarItem name="Documentation" url="https://docs.steambrew.app/users/" isExternal={true} />
 						<NavbarItem name="GitHub" url="https://github.com/SteamClientHomebrew/Millennium" isExternal={true} />
 
 						<a href="/discord">

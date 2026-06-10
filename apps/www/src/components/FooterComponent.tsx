@@ -23,13 +23,13 @@ function RenderFooter() {
 							<a href="/themes" className="footer-column-item">
 								<span>Themes</span>
 							</a>
-							<a href="https://docs.steambrew.app/" className="footer-column-item">
+							<a href="https://docs.steambrew.app/developers/" className="footer-column-item">
 								<span>Developers</span>
 							</a>
 						</div>
 						<div className="footer-column">
 							<h3 className="footer-column-header">Help</h3>
-							<a href="https://docs.steambrew.app/" target="_blank" className="footer-column-item">
+							<a href="https://docs.steambrew.app/users/" target="_blank" className="footer-column-item">
 								Documentation
 							</a>
 						</div>
