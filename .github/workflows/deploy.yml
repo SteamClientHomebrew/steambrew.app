@@ -91,7 +91,7 @@ jobs:
             - name: Sync www
               run: |
                   rsync -az --delete \
-                    apps/www/.next apps/www/public apps/www/package.json apps/www/.env \
+                    apps/www/.next apps/www/public apps/www/package.json apps/www/.env apps/www/credentials.json \
                     ubuntu@${{ secrets.SSH_HOST }}:~/net/steambrew/www/
 
             - name: Sync docs
