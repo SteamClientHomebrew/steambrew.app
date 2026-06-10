@@ -1,18 +1,19 @@
 {
-  "name": "@steambrew/web",
-  "version": "1.0.0",
-  "author": "SteamClientHomebrew",
-  "license": "MIT",
-  "private": true,
-  "packageManager": "bun@1.3.13",
-  "scripts": {
-    "install:all": "cd apps/www && bun install && cd ../docs && bun install",
-    "dev": "(cd apps/www && bun run dev) & (cd apps/docs && bun run dev) & wait",
-    "build": "cd apps/www && bun run build && cd ../../apps/docs && bun run build"
-  },
-  "trustedDependencies": [
-    "esbuild",
-    "protobufjs",
-    "re2"
-  ]
+	"name": "@steambrew/web",
+	"version": "1.0.0",
+	"author": "SteamClientHomebrew",
+	"license": "MIT",
+	"private": true,
+	"packageManager": "bun@1.3.13",
+	"scripts": {
+		"install:all": "cd apps/www && bun install && cd ../docs && bun install",
+		"dev": "(cd apps/www && bun run dev)",
+		"docs": "(cd apps/docs && bun run dev)",
+		"build": "cd apps/www && bun run build && cd ../../apps/docs && bun run build"
+	},
+	"trustedDependencies": [
+		"esbuild",
+		"protobufjs",
+		"re2"
+	]
 }
