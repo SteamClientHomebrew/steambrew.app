@@ -42,7 +42,7 @@ We officially offer nix package for millennium. Currently, it isn't available in
 1. Add input to your flake:
 
 ```nix
-inputs.millennium.url = "github:SteamClientHomebrew/Millennium?dir=packages/nix";
+millennium.url = "github:SteamClientHomebrew/Millennium?dir=packages/nix";
 ```
 
 2. Import millennium overlay:
@@ -65,7 +65,7 @@ programs.steam = {
 ```nix
 environment.systemPackages = [
   # Your other packages...
-  pkgs.millennium-steam
+  inputs.millennium.packages."${pkgs.system}".millennium-steam
 ];
 ```
 
