@@ -1,4 +1,3 @@
-import { Firebase } from '../../Firebase';
 import { GithubGraphQL } from '../../v2/GraphQLInterop';
 
 const FormatSize = (kilobytes) => {

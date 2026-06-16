@@ -1,4 +1,4 @@
-import { Firebase } from '../Firebase';
+import { Themes } from '../Database';
 import { GithubGraphQL } from './GraphQLInterop';
 
 export interface ThemeData {
@@ -6,8 +6,8 @@ export interface ThemeData {
 	owner: string;
 	repo: string;
 	firebaseDoc: any;
-	createTime: string;
-	createTimeMs: number;
+	createTime?: string;
+	createTimeMs?: number;
 
 	name: string;
 	defaultBranch: string;
@@ -26,36 +26,24 @@ let cachedThemes: ThemeData[] | null = null;
 let cacheTimestamp = 0;
 let inflightFetch: Promise<ThemeData[]> | null = null;
 
-function getDate(unixTime: number): string {
-	const d = new Date(unixTime * 1000);
-	return `${d.toISOString().slice(0, 19)}Z`;
-}
 
 async function fetchFreshThemes(): Promise<ThemeData[]> {
-	console.log('Cache miss — fetching fresh theme data');
-
-	const snap = await Firebase.Get();
+	const rows = Themes.getAll();
 
 	const docs: any[] = [];
-	snap.docs.forEach((doc: any) => {
-		try {
-			const data = doc.data();
-			if (data.disabled ?? false) return;
-			const createTimeSeconds = doc._createTime._seconds;
-			docs.push({
-				firebaseDoc: {
-					...data,
-					id: doc.id,
-					create_time: getDate(createTimeSeconds),
-				},
-				createTimeMs: createTimeSeconds * 1000,
-				readmePath: data.readme ?? 'README.md',
-				github: data.github,
-			});
-		} catch (e) {
-			console.error('Error processing theme doc:', e);
-		}
-	});
+	for (const row of rows) {
+		docs.push({
+			firebaseDoc: {
+				github: { owner: row.owner, repo: row.repo },
+				download: row.downloads,
+				id: row.id,
+				create_time: row.created_at * 1000,
+			},
+			createTimeMs: row.created_at * 1000,
+			readmePath: row.readme ?? 'README.md',
+			github: { owner: row.owner, repo: row.repo },
+		});
+	}
 
 	if (docs.length === 0) return [];
 
@@ -116,8 +104,8 @@ async function fetchFreshThemes(): Promise<ThemeData[]> {
 			owner: doc.github.owner,
 			repo: doc.github.repo,
 			firebaseDoc: doc.firebaseDoc,
-			createTime: doc.firebaseDoc.create_time,
-			createTimeMs: doc.createTimeMs,
+			createTime: doc.createTimeMs ? new Date(doc.createTimeMs).toISOString() : undefined,
+			createTimeMs: doc.createTimeMs || undefined,
 			name: repo.name,
 			defaultBranch,
 			latestCommitOid: target?.oid ?? null,

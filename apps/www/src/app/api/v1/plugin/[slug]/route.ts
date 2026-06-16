@@ -1,4 +1,5 @@
-import { StorageBucket } from '../../../Firebase';
+import { join } from 'path';
+import { stat } from 'fs/promises';
 import { FetchPlugins } from '../../plugins/GetPlugins';
 
 export const dynamic = 'force-dynamic';
@@ -10,13 +11,12 @@ const FindPlugin = async (id: string) => {
 		throw new Error('Plugin not found');
 	}
 
-	try {
-		const pluginBuild = StorageBucket.file(`plugins/${plugin.initCommitId}.zip`);
-		const [exists] = await pluginBuild.exists();
+	const pluginsDir = process.env.PLUGINS_DIR;
 
-		if (exists) {
-			const [metadata] = await pluginBuild.getMetadata();
-			plugin.fileSize = Number(metadata.size);
+	try {
+		if (pluginsDir) {
+			const s = await stat(join(pluginsDir, `${plugin.initCommitId}.zip`));
+			plugin.fileSize = s.size;
 			plugin.hasValidBuild = true;
 		} else {
 			console.warn(`Plugin ${plugin.id} does not have a build available.`);

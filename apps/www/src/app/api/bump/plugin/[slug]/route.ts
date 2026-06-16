@@ -1,5 +1,4 @@
-import { FieldValue } from 'firebase-admin/firestore';
-import { Database } from '../../../Firebase';
+import { PluginDownloads } from '../../../Database';
 import { FetchPlugins } from '../../../v1/plugins/GetPlugins';
 
 function withCORS(response: Response): Response {
@@ -23,11 +22,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 			return withCORS(new Response(JSON.stringify({ success: false, message: 'Plugin not found' }), { status: 404 }));
 		}
 
-		const docRef = Database.collection('downloads').doc(plugin.initCommitId);
-		await docRef.set({ downloadCount: FieldValue.increment(1) }, { merge: true });
-
-		const updatedDoc = await docRef.get();
-		const newCount = updatedDoc.exists ? updatedDoc.data()?.downloadCount : 1;
+		const newCount = PluginDownloads.increment(plugin.initCommitId);
 
 		return withCORS(
 			new Response(

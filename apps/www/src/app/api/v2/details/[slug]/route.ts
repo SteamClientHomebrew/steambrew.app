@@ -72,7 +72,7 @@ function buildDetailResponse(theme: ThemeData) {
 		data: {
 			...theme.firebaseDoc,
 			id: theme.id,
-			create_time: theme.createTimeMs,
+			create_time: theme.createTimeMs ?? 0,
 		},
 	};
 }

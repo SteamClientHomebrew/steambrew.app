@@ -1,4 +1,4 @@
-import { Firebase } from '@/app/api/Firebase';
+import { Themes } from '@/app/api/Database';
 
 const WHITELISTED_ORIGINS = ['https://spacetheme.net'];
 
@@ -25,18 +25,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 		return new Response("Missing 'id' parameter", { status: 400, headers });
 	}
 
-	const cleanId = slug.trim();
-
-	try {
-		const snap = await Firebase.FromID(cleanId);
-
-		if (!snap.exists) {
-			throw new Error(`Repository with ID '${cleanId}' not found`);
-		}
-
-		const mData = snap.data();
-		return Response.json({ download_count: mData?.download || 0 }, { headers });
-	} catch (error) {
-		return new Response(`Error: ${error.message}`, { status: 404, headers });
+	const theme = Themes.getById(slug.trim());
+	if (!theme) {
+		return new Response(`Error: Repository with ID '${slug.trim()}' not found`, { status: 404, headers });
 	}
+
+	return Response.json({ download_count: theme.downloads }, { headers });
 }

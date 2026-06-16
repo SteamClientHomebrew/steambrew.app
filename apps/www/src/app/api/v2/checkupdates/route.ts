@@ -22,6 +22,6 @@ export async function POST(request: Request) {
 	try {
 		return Response.json(await CheckForUpdates(json), { status: 200 });
 	} catch (error) {
-		return new Response(error as string, { status: 404 });
+		return new Response(error instanceof Error ? error.message : String(error), { status: 404 });
 	}
 }

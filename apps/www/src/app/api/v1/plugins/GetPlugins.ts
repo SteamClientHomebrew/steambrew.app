@@ -1,5 +1,7 @@
-import { Database, StorageBucket } from '../../Firebase';
-import { GetPluginData, PluginDataProps, PluginDataTable } from './GetPluginData';
+import { join } from 'path';
+import { stat } from 'fs/promises';
+import { PluginDownloads } from '../../Database';
+import { GetPluginData, PluginDataTable } from './GetPluginData';
 import { GetPluginMetadata } from './GetPluginMetadata';
 import { RetrievePluginList } from './GetPluginList';
 
@@ -21,25 +23,32 @@ let cacheTimestamp = 0;
 let inflightFetch: Promise<PluginDataTable> | null = null;
 
 const fetchFreshPlugins = async (): Promise<PluginDataTable> => {
-	console.log('Cache miss — fetching fresh plugin data');
-
 	const pluginList = await RetrievePluginList();
 
-	const [metadata, pluginData] = await Promise.all([GetPluginMetadata(), GetPluginData(pluginList)]);
-	const [files, downloadDocs] = await Promise.all([StorageBucket.getFiles({ prefix: 'plugins/' }), Database.collection('downloads').get()]);
+	const pluginsDir = process.env.PLUGINS_DIR;
+	if (!pluginsDir) throw new Error('PLUGINS_DIR is not set');
 
-	// Build lookup maps once instead of scanning per-plugin
-	const fileMetadataMap = new Map<string, any>();
+	const [metadata, pluginData, downloadRows] = await Promise.all([
+		GetPluginMetadata(),
+		GetPluginData(pluginList),
+		Promise.resolve(PluginDownloads.getAll()),
+	]);
+
+	// Build file size map from local disk
+	const fileMetadataMap = new Map<string, number>();
 	await Promise.all(
-		files[0].map(async (file) => {
-			const [meta] = await file.getMetadata();
-			fileMetadataMap.set(file.name, meta);
+		(await import('fs/promises').then(({ readdir }) => readdir(pluginsDir).catch(() => [] as string[]))).map(async (filename) => {
+			if (!filename.endsWith('.zip')) return;
+			try {
+				const s = await stat(join(pluginsDir, filename));
+				fileMetadataMap.set(`plugins/${filename}`, s.size);
+			} catch { }
 		}),
 	);
 
 	const downloadCounts = new Map<string, number>();
-	downloadDocs.forEach((doc) => {
-		downloadCounts.set(doc.id, doc.data().downloadCount || 0);
+	downloadRows.forEach((row) => {
+		downloadCounts.set(row.commit_id, row.download_count);
 	});
 
 	const metadataByCommit = new Map(metadata.map((m) => [m.commitId, m]));
@@ -53,10 +62,9 @@ const fetchFreshPlugins = async (): Promise<PluginDataTable> => {
 
 		const initCommitId = meta.id;
 		const filePath = `plugins/${initCommitId}.zip`;
-		const fileMetadata = fileMetadataMap.get(filePath);
-
-		if (fileMetadata) {
-			plugin.downloadSize = FormatBytes(fileMetadata.size);
+		const fileSize = fileMetadataMap.get(filePath);
+		if (fileSize !== undefined) {
+			plugin.downloadSize = FormatBytes(fileSize);
 		}
 
 		plugin.downloadCount = downloadCounts.get(initCommitId) ?? 0;

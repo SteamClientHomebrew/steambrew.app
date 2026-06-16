@@ -1,5 +1,4 @@
-import { FieldValue } from 'firebase-admin/firestore';
-import { Database } from '../../../Firebase';
+import { Themes } from '../../../Database';
 
 function withCORS(response: Response): Response {
 	response.headers.set('Access-Control-Allow-Origin', 'https://steamloopback.host');
@@ -15,11 +14,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 	}
 
 	try {
-		const docRef = Database.collection('V2').doc(slug);
-		await docRef.set({ download: FieldValue.increment(1) }, { merge: true });
-
-		const updatedDoc = await docRef.get();
-		const newCount = updatedDoc.exists ? updatedDoc.data()?.download : 1;
+		const newCount = Themes.incrementDownload(slug);
 
 		return withCORS(
 			new Response(

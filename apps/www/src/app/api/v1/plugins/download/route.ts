@@ -1,4 +1,5 @@
-import { Database, firebaseAdmin, StorageBucket } from '../../../Firebase';
+import { join } from 'path';
+import { PluginDownloads } from '../../../Database';
 
 export async function GET(request: Request) {
 	const { searchParams } = new URL(request.url);
@@ -10,30 +11,30 @@ export async function GET(request: Request) {
 		return new Response('Missing plugin ID', { status: 400 });
 	}
 
-	const file = StorageBucket.file(`plugins/${pluginId}.zip`);
+	if (!/^[a-f0-9]{40}$/.test(pluginId)) {
+		return new Response('Invalid plugin ID', { status: 400 });
+	}
 
-	if (!(await file.exists())[0]) {
+	const pluginsDir = process.env.PLUGINS_DIR;
+	if (!pluginsDir) return new Response('PLUGINS_DIR not configured', { status: 500 });
+
+	const filePath = join(pluginsDir, `${pluginId}.zip`);
+	const file = Bun.file(filePath);
+
+	if (!(await file.exists())) {
 		return new Response(JSON.stringify({ error: 'File not found.' }), { status: 404 });
 	}
 
 	try {
-		const docRef = Database.collection('downloads').doc(pluginId);
-		await docRef.set({ downloadCount: firebaseAdmin.firestore.FieldValue.increment(1) }, { merge: true });
+		PluginDownloads.increment(pluginId);
 	} catch (err) {
 		console.error('Error updating download count:', err);
 	}
 
-	try {
-		const [metadata] = await file.getMetadata();
-		const stream = file.createReadStream();
-
-		const headers = new Headers();
-		headers.set('Content-Type', metadata.contentType || 'application/zip');
-		headers.set('Content-Disposition', `attachment; filename="${downloadName}"`);
-
-		return new Response(stream as any, { headers });
-	} catch (err) {
-		console.error('Error streaming file:', err);
-		return new Response(JSON.stringify({ error: 'An error occurred streaming the target file.' }), { status: 500 });
-	}
+	return new Response(file, {
+		headers: {
+			'Content-Type': 'application/zip',
+			'Content-Disposition': `attachment; filename="${downloadName}"`,
+		},
+	});
 }

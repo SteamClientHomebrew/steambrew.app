@@ -32,10 +32,8 @@ jobs:
 
             - name: Authenticate SteamBrew
               run: |
-                  echo "$FIREBASE_CREDENTIALS" | base64 -d > ./apps/www/credentials.json
-                  echo "$BEARER" > ./apps/www/.env
+                  printf '%s\nDB_PATH=/home/ubuntu/net/storage/steambrew/steambrew.db\nPLUGINS_DIR=/home/ubuntu/net/storage/steambrew/plugins\n' "$BEARER" > ./apps/www/.env
               env:
-                  FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
                   BEARER: ${{ secrets.BEARER }}
 
             - name: Install and build docs
@@ -91,7 +89,7 @@ jobs:
             - name: Sync www
               run: |
                   rsync -az --delete \
-                    apps/www/.next apps/www/public apps/www/package.json apps/www/.env apps/www/credentials.json \
+                    apps/www/.next apps/www/public apps/www/package.json apps/www/.env \
                     ubuntu@${{ secrets.SSH_HOST }}:~/net/steambrew/www/
 
             - name: Sync docs
