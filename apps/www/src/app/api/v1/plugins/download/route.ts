@@ -1,4 +1,5 @@
-import { join } from 'path';
+import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { PluginDownloads } from '../../../Database';
 
 export async function GET(request: Request) {
@@ -19,9 +20,11 @@ export async function GET(request: Request) {
 	if (!pluginsDir) return new Response('PLUGINS_DIR not configured', { status: 500 });
 
 	const filePath = join(pluginsDir, `${pluginId}.zip`);
-	const file = Bun.file(filePath);
 
-	if (!(await file.exists())) {
+	let contents: Buffer;
+	try {
+		contents = await readFile(filePath);
+	} catch {
 		return new Response(JSON.stringify({ error: 'File not found.' }), { status: 404 });
 	}
 
@@ -31,7 +34,7 @@ export async function GET(request: Request) {
 		console.error('Error updating download count:', err);
 	}
 
-	return new Response(file, {
+	return new Response(contents, {
 		headers: {
 			'Content-Type': 'application/zip',
 			'Content-Disposition': `attachment; filename="${downloadName}"`,

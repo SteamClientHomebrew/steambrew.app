@@ -27,8 +27,7 @@
       }
     ],
     "strictNullChecks": true,
-    "target": "ES2017",
-    "types": ["bun"]
+    "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",
