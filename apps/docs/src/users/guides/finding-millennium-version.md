@@ -7,7 +7,7 @@ order: 4
 ::: code-group
 
 ```powershell [Windows]
-(gi "$(gp 'HKLM:\SOFTWARE\Wow6432Node\Valve\Steam' | % InstallPath)\millennium.dll").VersionInfo.FileVersion
+(gi "$(gp 'HKLM:\SOFTWARE\Wow6432Node\Valve\Steam' | % InstallPath)\millennium\lib\millennium.dll").VersionInfo.FileVersion
 ```
 
 ```bash [Linux]
