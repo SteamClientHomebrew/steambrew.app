@@ -8,16 +8,14 @@ The abbreviation `%STEAM%` is just a placeholder for your actual Steam path. If 
 
 ## Windows
 
-| Component                  | Absolute Path                                  |
-| -------------------------- | ---------------------------------------------- |
-| Millennium                 | `%STEAM%/user32.dll`, `%STEAM%/millennium.dll` |
-| Millennium Assets          | `%STEAM%/ext/data/assets`                      |
-| Millennium API             | `%STEAM%/ext/data/shims`                       |
-| Plugins                    | `%STEAM%/plugin`                               |
-| Themes                     | `%STEAM%/steamui/skins`                        |
-| Logs                       | `%STEAM%/ext/logs`                             |
-| User Config                | `%STEAM%/ext`                                  |
-| Plugin Runtime Environment | `%STEAM%/ext/data/cache`                       |
+| Component                  | Absolute Path                                    |
+| -------------------------- | ----------------------------------------------   |
+| Millennium                 | `%STEAM%/wsock32.dll`, `%STEAM%/millennium/lib/` |
+| Millennium Assets          | `%STEAM%/millennium/bin/`                        |
+| Plugins                    | `%STEAM%/millennium/plugin`                      |
+| Themes                     | `%STEAM%/millennium/themes`                      |
+| Logs                       | `%STEAM%/millennium/logs`                        |
+| User Config                | `%STEAM%/millennium/config`                      |
 
 ## Linux
 

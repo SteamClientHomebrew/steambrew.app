@@ -53,9 +53,8 @@ While uncommon, some antivirus solutions like may cause issues with Millenniums 
 
 Note: These files are in the root directory of your Steam installation.
 
-- millennium.dll
-- user32.dll
-- python311.dll
+- version.dll
+- millennium.hhx64.dll
 
 :::
 
