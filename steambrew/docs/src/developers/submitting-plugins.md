@@ -48,7 +48,7 @@ website will automatically render your repository's README and relevant data.
 
    The `@steambrew/client` (or `millennium` if you are using starlight) package
    exports multiple components that Steam uses throughout its client. See [this
-   page](../plugins/ts/components). Any plain HTML elements are forbidden unless
+   page](../plugins/ts/components/Button). Any plain HTML elements are forbidden unless
    Steam doesn't have the component you are looking for.
 
 4. Themes are not plugins' business!
