@@ -12,10 +12,11 @@ const FindPlugin = async (id: string) => {
 	}
 
 	const pluginsDir = process.env.PLUGINS_DIR;
+	const extension = plugin.format === 'star' ? 'star' : 'zip';
 
 	try {
 		if (pluginsDir) {
-			const s = await stat(join(pluginsDir, `${plugin.initCommitId}.zip`));
+			const s = await stat(join(pluginsDir, `${plugin.initCommitId}.${extension}`));
 			plugin.fileSize = s.size;
 			plugin.hasValidBuild = true;
 		} else {
@@ -27,7 +28,7 @@ const FindPlugin = async (id: string) => {
 		plugin.hasValidBuild = false;
 	}
 
-	plugin.downloadUrl = `/api/v1/plugins/download/?id=${plugin?.initCommitId}&n=${plugin?.pluginJson?.name}.zip`;
+	plugin.downloadUrl = `/api/v1/plugins/download/?id=${plugin?.initCommitId}&n=${plugin?.pluginJson?.name}.${extension}`;
 	return plugin;
 };
 

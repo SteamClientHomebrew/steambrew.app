@@ -1,3 +1,4 @@
+import { parse as parseToml } from 'smol-toml';
 import { GithubGraphQL } from '../../v2/GraphQLInterop';
 
 const FormatSize = (kilobytes) => {
@@ -33,12 +34,24 @@ export interface PluginDataProps {
 	fileSize?: number;
 	hasValidBuild?: boolean;
 	downloadUrl?: string;
+
+	format?: 'loose' | 'star';
+	pluginId?: string;
 }
 
 export interface PluginDataTable {
 	pluginData: PluginDataProps[];
-	metadata: { id: string; commitId: string }[];
+	metadata: { id: string; commitId: string; format?: 'loose' | 'star'; pluginId?: string }[];
 }
+
+const NormalizeStarManifest = (toml: any) => ({
+	name: toml?.plugin?.id,
+	common_name: toml?.plugin?.name,
+	description: toml?.plugin?.description,
+	author: toml?.plugin?.author,
+	version: toml?.plugin?.version,
+	useBackend: Boolean(toml?.backend),
+});
 
 const GetPluginData = (pluginList) => {
 	return new Promise<PluginDataProps[]>(async (resolve, reject) => {
@@ -61,6 +74,11 @@ const GetPluginData = (pluginList) => {
                         }
                     }
                     pluginJson: object(expression: "${repo.commit}:plugin.json") {
+                        ... on Blob {
+                            text
+                        }
+                    }
+                    manifestToml: object(expression: "${repo.commit}:millennium.toml") {
                         ... on Blob {
                             text
                         }
@@ -93,7 +111,7 @@ const GetPluginData = (pluginList) => {
 			.map((repository) => repository)
 			.map((repo: any): PluginDataProps | null => {
 				try {
-					const pluginJson = JSON.parse(repo.pluginJson.text);
+					const pluginJson = repo.pluginJson?.text ? JSON.parse(repo.pluginJson.text) : NormalizeStarManifest(parseToml(repo.manifestToml.text));
 					return {
 						pluginJson: pluginJson,
 						usesBackend: pluginJson?.useBackend === true || pluginJson?.useBackend === undefined,

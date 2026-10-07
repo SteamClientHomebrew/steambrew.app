@@ -34,7 +34,7 @@ const fetchFreshPlugins = async (): Promise<PluginDataTable> => {
 	const fileMetadataMap = new Map<string, number>();
 	await Promise.all(
 		(await import('fs/promises').then(({ readdir }) => readdir(pluginsDir).catch(() => [] as string[]))).map(async (filename) => {
-			if (!filename.endsWith('.zip')) return;
+			if (!filename.endsWith('.zip') && !filename.endsWith('.star')) return;
 			try {
 				const s = await stat(join(pluginsDir, filename));
 				fileMetadataMap.set(`plugins/${filename}`, s.size);
@@ -57,7 +57,8 @@ const fetchFreshPlugins = async (): Promise<PluginDataTable> => {
 		}
 
 		const initCommitId = meta.id;
-		const filePath = `plugins/${initCommitId}.zip`;
+		const extension = meta.format === 'star' ? 'star' : 'zip';
+		const filePath = `plugins/${initCommitId}.${extension}`;
 		const fileSize = fileMetadataMap.get(filePath);
 		if (fileSize !== undefined) {
 			plugin.downloadSize = FormatBytes(fileSize);
@@ -67,6 +68,8 @@ const fetchFreshPlugins = async (): Promise<PluginDataTable> => {
 		plugin.id = initCommitId.substring(0, 12);
 		plugin.commitId = meta.commitId;
 		plugin.initCommitId = initCommitId;
+		plugin.format = meta.format ?? 'loose';
+		plugin.pluginId = meta.pluginId;
 	}
 
 	return { pluginData, metadata };
