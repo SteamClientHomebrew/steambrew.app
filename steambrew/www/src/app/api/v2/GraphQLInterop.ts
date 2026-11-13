@@ -19,6 +19,7 @@ const GithubGraphQL = {
 			},
 			body: JSON.stringify({ query: queryWithRateLimit }),
 			cache: 'no-store',
+			signal: AbortSignal.timeout(30000),
 		});
 
 		const json = await response.json();

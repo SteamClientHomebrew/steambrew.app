@@ -8,6 +8,7 @@ const RetrievePluginList = async () => {
 				'Content-Type': 'application/json',
 			},
 			next: { revalidate: 300 },
+			signal: AbortSignal.timeout(15000),
 		})
 			.then((text) => text.json())
 			.then((data) => {

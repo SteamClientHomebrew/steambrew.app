@@ -3,6 +3,7 @@ interface PluginMetadata {
 	id: string;
 	format?: 'loose' | 'star';
 	pluginId?: string;
+	unlisted?: boolean;
 }
 
 const GetPluginMetadata = async () => {
@@ -13,8 +14,12 @@ const GetPluginMetadata = async () => {
 				'Content-Type': 'application/json',
 			},
 			next: { revalidate: 300 },
+			signal: AbortSignal.timeout(15000),
 		})
-			.then((text) => text.json())
+			.then((res) => {
+				if (!res.ok) throw new Error(`Metadata request failed: ${res.status}`);
+				return res.json();
+			})
 			.then((data) => {
 				resolve(data);
 			})

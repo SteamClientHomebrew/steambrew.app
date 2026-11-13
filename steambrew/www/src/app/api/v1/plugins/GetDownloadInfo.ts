@@ -5,6 +5,7 @@ export const GetDownloadInfo = async (): Promise<Record<string, number>> => {
 			'Content-Type': 'application/json',
 		},
 		next: { revalidate: 300 },
+		signal: AbortSignal.timeout(15000),
 	}).then((res) => res.json());
 
 	const downloadCounts: Record<string, number> = {};

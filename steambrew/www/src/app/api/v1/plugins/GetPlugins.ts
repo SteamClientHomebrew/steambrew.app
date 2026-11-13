@@ -14,6 +14,7 @@ const FormatBytes = (bytes: number, decimals = 2) => {
 
 // Cache duration: 5 minutes (in milliseconds)
 const CACHE_DURATION_MS = 5 * 60 * 1000;
+const STALE_RETRY_MS = 30 * 1000;
 
 // In-memory cache — single source of truth, no Firestore round-trips
 let cachedResult: PluginDataTable | null = null;
@@ -70,6 +71,7 @@ const fetchFreshPlugins = async (): Promise<PluginDataTable> => {
 		plugin.initCommitId = initCommitId;
 		plugin.format = meta.format ?? 'loose';
 		plugin.pluginId = meta.pluginId;
+		plugin.unlisted = meta.unlisted ?? false;
 	}
 
 	return { pluginData, metadata };
@@ -89,6 +91,14 @@ export const FetchPlugins = async (): Promise<PluginDataTable> => {
 			cachedResult = result;
 			cacheTimestamp = Date.now();
 			return result;
+		})
+		.catch((error) => {
+			if (cachedResult) {
+				console.error('Plugin refresh failed, serving stale cache:', error instanceof Error ? error.message : error);
+				cacheTimestamp = Date.now() - CACHE_DURATION_MS + STALE_RETRY_MS;
+				return cachedResult;
+			}
+			throw error;
 		})
 		.finally(() => {
 			inflightFetch = null;

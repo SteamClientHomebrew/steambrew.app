@@ -37,11 +37,12 @@ export interface PluginDataProps {
 
 	format?: 'loose' | 'star';
 	pluginId?: string;
+	unlisted?: boolean;
 }
 
 export interface PluginDataTable {
 	pluginData: PluginDataProps[];
-	metadata: { id: string; commitId: string; format?: 'loose' | 'star'; pluginId?: string }[];
+	metadata: { id: string; commitId: string; format?: 'loose' | 'star'; pluginId?: string; unlisted?: boolean }[];
 }
 
 const NormalizeStarManifest = (toml: any) => ({
@@ -53,13 +54,12 @@ const NormalizeStarManifest = (toml: any) => ({
 	useBackend: Boolean(toml?.backend),
 });
 
-const GetPluginData = (pluginList) => {
-	return new Promise<PluginDataProps[]>(async (resolve, reject) => {
-		const query = `
+const GetPluginData = async (pluginList): Promise<PluginDataProps[]> => {
+	const query = `
             query {
             ${pluginList
-				.map(
-					(repo, index) => `
+			.map(
+				(repo, index) => `
                 repo${index}: repository(owner: "${repo.owner}", name: "${repo.repo}") {
                     stargazerCount
                     diskUsage
@@ -100,38 +100,39 @@ const GetPluginData = (pluginList) => {
                     }
                 }
             `,
-				)
-				.join('\n')}
+			)
+			.join('\n')}
             }
         `;
 
-		const responseJson = await GithubGraphQL.Post(query);
+	const responseJson = await GithubGraphQL.Post(query);
 
-		const jsonResponse = Object.values(responseJson.data)
-			.map((repository) => repository)
-			.map((repo: any): PluginDataProps | null => {
-				try {
-					const pluginJson = repo.pluginJson?.text ? JSON.parse(repo.pluginJson.text) : NormalizeStarManifest(parseToml(repo.manifestToml.text));
-					return {
-						pluginJson: pluginJson,
-						usesBackend: pluginJson?.useBackend === true || pluginJson?.useBackend === undefined,
-						readme: repo?.pluginReadme?.text || repo.readme.text,
-						stargazerCount: repo.stargazerCount,
-						diskUsage: FormatSize(repo.diskUsage),
-						commitDate: repo.commit.committedDate,
-						commitMessage: repo.commit.message,
-						repoName: repo.repoName,
-						repoOwner: repo.repoOwner.login,
-						id: repo.commitId.oid,
-					};
-				} catch {
-					return null;
-				}
-			})
-			.filter((item): item is PluginDataProps => item !== null);
+	if (!responseJson?.data) {
+		throw new Error(`GitHub GraphQL returned no data: ${JSON.stringify((responseJson as any)?.errors ?? (responseJson as any)?.message ?? null)}`);
+	}
 
-		resolve(jsonResponse);
-	});
+	return Object.values(responseJson.data)
+		.map((repository) => repository)
+		.map((repo: any): PluginDataProps | null => {
+			try {
+				const pluginJson = repo.pluginJson?.text ? JSON.parse(repo.pluginJson.text) : NormalizeStarManifest(parseToml(repo.manifestToml.text));
+				return {
+					pluginJson: pluginJson,
+					usesBackend: pluginJson?.useBackend === true || pluginJson?.useBackend === undefined,
+					readme: repo?.pluginReadme?.text || repo.readme.text,
+					stargazerCount: repo.stargazerCount,
+					diskUsage: FormatSize(repo.diskUsage),
+					commitDate: repo.commit.committedDate,
+					commitMessage: repo.commit.message,
+					repoName: repo.repoName,
+					repoOwner: repo.repoOwner.login,
+					id: repo.commitId.oid,
+				};
+			} catch {
+				return null;
+			}
+		})
+		.filter((item): item is PluginDataProps => item !== null);
 };
 
 export { GetPluginData };
