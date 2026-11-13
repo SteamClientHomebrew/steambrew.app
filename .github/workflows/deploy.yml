@@ -32,9 +32,10 @@ jobs:
 
             - name: Authenticate SteamBrew
               run: |
-                  printf '%s\nDB_PATH=/home/ubuntu/net/storage/steambrew/steambrew.db\nPLUGINS_DIR=/home/ubuntu/net/storage/steambrew/plugins\n' "$BEARER" > ./steambrew/www/.env
+                  printf '%s\nDB_PATH=/home/ubuntu/net/storage/steambrew/steambrew.db\nPLUGINS_DIR=/home/ubuntu/net/storage/steambrew/plugins\nADMIN_TOKEN=%s\n' "$BEARER" "$ADMIN_TOKEN" > ./steambrew/www/.env
               env:
                   BEARER: ${{ secrets.BEARER }}
+                  ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
 
             - name: Install and build docs
               working-directory: steambrew/docs

@@ -121,6 +121,11 @@ async function fetchFreshThemes(): Promise<ThemeData[]> {
 	return themes;
 }
 
+export function ResetThemeCache() {
+	cachedThemes = null;
+	cacheTimestamp = 0;
+}
+
 export async function FetchThemes(): Promise<ThemeData[]> {
 	if (cachedThemes && Date.now() - cacheTimestamp < CACHE_DURATION_MS) {
 		return cachedThemes;

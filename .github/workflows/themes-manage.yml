@@ -1,0 +1,55 @@
+name: Manage Themes
+
+on:
+    workflow_dispatch:
+        inputs:
+            action:
+                description: What to do with the theme
+                type: choice
+                required: true
+                options:
+                    - add
+                    - enable
+                    - disable
+                    - remove
+            owner:
+                description: GitHub owner of the theme repository
+                type: string
+                required: true
+            repo:
+                description: Name of the theme repository
+                type: string
+                required: true
+            readme:
+                description: Readme path inside the repository (add only, defaults to README.md)
+                type: string
+                required: false
+
+permissions:
+    contents: read
+
+concurrency:
+    group: manage-themes
+    cancel-in-progress: false
+
+jobs:
+    manage:
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+
+        steps:
+            - name: Call admin API
+              env:
+                  ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+                  ACTION: ${{ inputs.action }}
+                  OWNER: ${{ inputs.owner }}
+                  REPO: ${{ inputs.repo }}
+                  README: ${{ inputs.readme }}
+              run: |
+                  payload=$(jq -n --arg action "$ACTION" --arg owner "$OWNER" --arg repo "$REPO" --arg readme "$README" \
+                    '{action: $action, owner: $owner, repo: $repo} + (if $readme != "" then {readme: $readme} else {} end)')
+                  curl --silent --show-error --fail-with-body --max-time 60 \
+                    -X POST https://steambrew.app/api/admin/themes \
+                    -H "Authorization: Bearer $ADMIN_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    -d "$payload" | jq .

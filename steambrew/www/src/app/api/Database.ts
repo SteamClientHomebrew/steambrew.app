@@ -36,6 +36,23 @@ export const Themes = {
 	getByRepo: (owner: string, repo: string): ThemeRow | null => {
 		return (getDb().prepare('SELECT * FROM themes WHERE owner = ? AND repo = ?').get(owner, repo) as ThemeRow) ?? null;
 	},
+	getEvery: (): ThemeRow[] => {
+		return getDb().prepare('SELECT * FROM themes').all() as ThemeRow[];
+	},
+	insert: (id: string, owner: string, repo: string, readme: string | null, disabled: boolean): void => {
+		getDb()
+			.prepare('INSERT INTO themes (id, owner, repo, readme, disabled, downloads, created_at) VALUES (?, ?, ?, ?, ?, 0, ?)')
+			.run(id, owner, repo, readme, disabled ? 1 : 0, Math.floor(Date.now() / 1000));
+	},
+	setDisabled: (id: string, disabled: boolean): void => {
+		getDb().prepare('UPDATE themes SET disabled = ? WHERE id = ?').run(disabled ? 1 : 0, id);
+	},
+	setReadme: (id: string, readme: string | null): void => {
+		getDb().prepare('UPDATE themes SET readme = ? WHERE id = ?').run(readme, id);
+	},
+	remove: (id: string): void => {
+		getDb().prepare('DELETE FROM themes WHERE id = ?').run(id);
+	},
 	incrementDownload: (id: string): number => {
 		getDb().prepare('UPDATE themes SET downloads = downloads + 1 WHERE id = ?').run(id);
 		const row = getDb().prepare('SELECT downloads FROM themes WHERE id = ?').get(id) as {
