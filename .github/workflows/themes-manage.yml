@@ -46,6 +46,7 @@ jobs:
                   REPO: ${{ inputs.repo }}
                   README: ${{ inputs.readme }}
               run: |
+                  set -o pipefail
                   payload=$(jq -n --arg action "$ACTION" --arg owner "$OWNER" --arg repo "$REPO" --arg readme "$README" \
                     '{action: $action, owner: $owner, repo: $repo} + (if $readme != "" then {readme: $readme} else {} end)')
                   curl --silent --show-error --fail-with-body --max-time 60 \
